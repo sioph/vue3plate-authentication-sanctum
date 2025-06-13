@@ -14,35 +14,25 @@ Vue 3 authentication package for vue3plate boilerplate that integrates with Lara
 
 ## Installation
 
-### Automatic Installation (Recommended)
-
-1. **Install the package:**
-   ```bash
-   npm install vue3plate-auth-sanctum
-   ```
-
-2. **The package will automatically install and integrate all necessary files into your Vue3Plate project**
-
-### Manual Installation
-
-If automatic installation doesn't work, you can manually run the installer:
-
-```bash
-# After installing the package
-npx vue3plate-auth-install
-
-# Or if you installed globally
-vue3plate-auth-install
-```
-
-### Alternative: Direct Installation Command
-
-You can also run the installer directly:
+### Step 1: Install the Package
 
 ```bash
 npm install vue3plate-auth-sanctum
+```
+
+### Step 2: Run the Installation Command
+
+After installing the package, run the installer to copy and integrate the authentication files:
+
+```bash
+# Recommended: Use npx to run the installer
+npx vue3plate-auth-install
+
+# Alternative: Run directly
 node node_modules/vue3plate-auth-sanctum/bin/install.js
 ```
+
+**Note:** The installer must be run manually to avoid installation conflicts. It will safely copy all authentication files and integrate them into your Vue3Plate project.
 
 ## What Gets Installed
 

@@ -219,8 +219,19 @@ class Vue3PlateAuthInstaller {
         await this.copyFile(configStub, configDest);
     }
 
-    async copyDirectory(src, dest) {
+    async copyDirectory(src, dest, visited = new Set()) {
         if (!fs.existsSync(src)) return;
+        
+        // Resolve real path to handle symbolic links
+        const realSrc = fs.realpathSync(src);
+        
+        // Check for circular references
+        if (visited.has(realSrc)) {
+            this.log(`Skipping circular reference: ${src}`, 'yellow');
+            return;
+        }
+        
+        visited.add(realSrc);
         
         if (!fs.existsSync(dest)) {
             fs.mkdirSync(dest, { recursive: true });
@@ -229,15 +240,35 @@ class Vue3PlateAuthInstaller {
         const items = fs.readdirSync(src);
         
         for (const item of items) {
+            // Skip problematic directories
+            if (item === 'node_modules' || item === '.git' || item.startsWith('.')) {
+                continue;
+            }
+            
             const srcPath = path.join(src, item);
             const destPath = path.join(dest, item);
             
-            if (fs.statSync(srcPath).isDirectory()) {
-                await this.copyDirectory(srcPath, destPath);
-            } else {
-                await this.copyFile(srcPath, destPath);
+            try {
+                const stats = fs.lstatSync(srcPath);
+                
+                // Skip symbolic links to avoid infinite recursion
+                if (stats.isSymbolicLink()) {
+                    this.log(`Skipping symbolic link: ${srcPath}`, 'yellow');
+                    continue;
+                }
+                
+                if (stats.isDirectory()) {
+                    await this.copyDirectory(srcPath, destPath, visited);
+                } else {
+                    await this.copyFile(srcPath, destPath);
+                }
+            } catch (error) {
+                this.log(`Error processing ${srcPath}: ${error.message}`, 'yellow');
+                continue;
             }
         }
+        
+        visited.delete(realSrc);
     }
 
     async copyFile(src, dest) {

@@ -25,7 +25,6 @@
   "scripts": {
     "build": "vite build --mode lib",
     "dev": "vite build --mode lib --watch",
-    "postinstall": "node bin/install.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublishOnly": "npm run build"
   },
