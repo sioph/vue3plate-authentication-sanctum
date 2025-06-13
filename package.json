@@ -1,5 +1,5 @@
 {
-  "name": "@sioph/vue3plate-authentication-sanctum",
+  "name": "vue3plate-auth-sanctum",
   "version": "1.0.0",
   "type": "module",
   "description": "Vue 3 authentication package for vue3plate boilerplate that integrates with Laravel Sanctum",

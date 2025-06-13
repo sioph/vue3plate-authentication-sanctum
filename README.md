@@ -1,4 +1,4 @@
-# @sioph/vue3plate-authentication-sanctum
+# vue3plate-auth-sanctum
 
 Vue 3 authentication package that integrates seamlessly with `sioph/laravelplate-authentication-sanctum` Laravel backend package.
 
@@ -21,7 +21,7 @@ To maintain compatibility with the Laravel backend, this package does **NOT** in
 ## Installation
 
 ```bash
-npm install @sioph/vue3plate-authentication-sanctum
+npm install vue3plate-auth-sanctum
 ```
 
 ## Quick Start
@@ -34,7 +34,7 @@ import { createStore } from 'vuex'
 import App from './App.vue'
 
 // Import the authentication feature
-import { createAuthenticationFeature } from '@sioph/vue3plate-authentication-sanctum'
+import { createAuthenticationFeature } from 'vue3plate-auth-sanctum'
 import { useFeatureIntegration } from './composables/useFeatureIntegration'
 
 // Your existing routes and store modules
@@ -117,7 +117,7 @@ VITE_USER_KEY=auth_user
 </template>
 
 <script setup>
-import { useAuth } from '@sioph/vue3plate-authentication-sanctum'
+import { useAuth } from 'vue3plate-auth-sanctum'
 
 const config = {
   apiBaseUrl: import.meta.env.VITE_API_URL,
@@ -147,7 +147,7 @@ const handleLogout = async () => {
 </template>
 
 <script setup>
-import { AuthGuard } from '@sioph/vue3plate-authentication-sanctum'
+import { AuthGuard } from 'vue3plate-auth-sanctum'
 
 const authConfig = {
   apiBaseUrl: import.meta.env.VITE_API_URL,
