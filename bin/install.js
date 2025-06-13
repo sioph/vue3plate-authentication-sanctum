@@ -43,6 +43,9 @@ class Vue3PlateAuthInstaller {
             // Copy authentication views
             await this.copyAuthViews();
             
+            // Copy authentication utilities
+            await this.copyAuthUtils();
+            
             // Copy and merge store modules
             await this.copyAuthStore();
             
@@ -116,7 +119,24 @@ class Vue3PlateAuthInstaller {
             fs.mkdirSync(modulesDir, { recursive: true });
         }
         
-        await this.copyFile(srcStore, destStore);
+        // Copy the auth store file and fix import paths
+        if (fs.existsSync(srcStore)) {
+            let authStoreContent = fs.readFileSync(srcStore, 'utf8');
+            
+            // Fix import paths for the new location (store/modules/auth.js)
+            authStoreContent = authStoreContent.replace(
+                "import { authApi } from '../utils/api.js'",
+                "import { authApi } from '../../utils/api.js'"
+            );
+            
+            // Don't overwrite if file already exists
+            if (!fs.existsSync(destStore)) {
+                fs.writeFileSync(destStore, authStoreContent);
+                this.log(`Created auth store: ${destStore}`, 'green');
+            } else {
+                this.log(`Skipping ${destStore} (already exists)`, 'yellow');
+            }
+        }
         
         // Update main store to include auth module
         await this.updateMainStore();
@@ -128,6 +148,19 @@ class Vue3PlateAuthInstaller {
         const destComposables = path.join(this.projectRoot, 'src', 'composables');
         
         await this.copyDirectory(srcComposables, destComposables);
+    }
+
+    async copyAuthUtils() {
+        this.log('⚙️ Copying authentication utilities...', 'blue');
+        const srcUtils = path.join(this.packageRoot, 'src', 'utils');
+        const destUtils = path.join(this.projectRoot, 'src', 'utils');
+        
+        // Ensure utils directory exists
+        if (!fs.existsSync(destUtils)) {
+            fs.mkdirSync(destUtils, { recursive: true });
+        }
+        
+        await this.copyDirectory(srcUtils, destUtils);
     }
 
     async updateRouter() {
@@ -177,21 +210,35 @@ class Vue3PlateAuthInstaller {
             let mainContent = fs.readFileSync(mainJsPath, 'utf8');
             
             // Add auth composable import
-            const authImport = "import { initAuth } from './composables/useAuth.js';\n";
-            if (!mainContent.includes("import { initAuth }")) {
-                mainContent = authImport + mainContent;
+            const authImport = "import { useAuth } from './composables/useAuth.js';\nimport authConfig from './config/auth.js';\n";
+            if (!mainContent.includes("import { useAuth }") && !mainContent.includes("from './composables/useAuth.js'")) {
+                // Add imports after existing imports
+                const lastImportMatch = mainContent.match(/import.*from.*['"]\s*$/gm);
+                if (lastImportMatch) {
+                    const lastImport = lastImportMatch[lastImportMatch.length - 1];
+                    mainContent = mainContent.replace(lastImport, lastImport + '\n' + authImport);
+                } else {
+                    mainContent = authImport + '\n' + mainContent;
+                }
             }
             
             // Add auth initialization before app mount
-            const initCall = "\n// Initialize authentication\nawait initAuth();\n";
-            if (!mainContent.includes("initAuth()")) {
+            const initCall = "\n// Initialize authentication\nconst { initializeAuth } = useAuth(authConfig);\ninitializeAuth();\n";
+            if (!mainContent.includes("initializeAuth()") && !mainContent.includes("// Initialize authentication")) {
                 mainContent = mainContent.replace(
                     /app\.mount\(['"]#app['"]\)/,
                     initCall + "\napp.mount('#app')"
                 );
             }
             
-            fs.writeFileSync(mainJsPath, mainContent);
+            // Only write if we made changes
+            const originalContent = fs.readFileSync(mainJsPath, 'utf8');
+            if (mainContent !== originalContent) {
+                fs.writeFileSync(mainJsPath, mainContent);
+                this.log('Updated main.js with auth initialization', 'green');
+            } else {
+                this.log('main.js already has auth initialization', 'yellow');
+            }
         }
     }
 
