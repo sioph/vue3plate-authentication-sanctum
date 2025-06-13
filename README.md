@@ -1,246 +1,159 @@
-# vue3plate-auth-sanctum
+# Vue3Plate Authentication with Sanctum
 
-Vue 3 authentication package that integrates seamlessly with `sioph/laravelplate-authentication-sanctum` Laravel backend package.
+Vue 3 authentication package for vue3plate boilerplate that integrates with Laravel Sanctum.
 
 ## Features
 
-This package provides **only the core authentication features** that match the Laravel backend:
-
-- ✅ **User Registration** - Complete registration form with validation
-- ✅ **User Login** - Login form with remember me functionality  
-- ✅ **User Logout** - Secure logout with token cleanup
-
-## What's NOT Included
-
-To maintain compatibility with the Laravel backend, this package does **NOT** include:
-- ❌ Profile management
-- ❌ Password change functionality
-- ❌ User profile editing
-- ❌ Additional user management features
+- Login/Register functionality
+- Email verification
+- Password reset
+- Profile management
+- Route guards
+- Automatic token management
+- Modular installation like Laravel packages
 
 ## Installation
 
+### Automatic Installation (Recommended)
+
+1. **Install the package:**
+   ```bash
+   npm install vue3plate-auth-sanctum
+   ```
+
+2. **The package will automatically install and integrate all necessary files into your Vue3Plate project**
+
+### Manual Installation
+
+If automatic installation doesn't work, you can manually run the installer:
+
+```bash
+# After installing the package
+npx vue3plate-auth-install
+
+# Or if you installed globally
+vue3plate-auth-install
+```
+
+### Alternative: Direct Installation Command
+
+You can also run the installer directly:
+
 ```bash
 npm install vue3plate-auth-sanctum
+node node_modules/vue3plate-auth-sanctum/bin/install.js
 ```
 
-## Quick Start
+## What Gets Installed
 
-```javascript
-// main.js
-import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
-import { createStore } from 'vuex'
-import App from './App.vue'
+The installer will automatically:
 
-// Import the authentication feature
-import { createAuthenticationFeature } from 'vue3plate-auth-sanctum'
-import { useFeatureIntegration } from './composables/useFeatureIntegration'
+- ✅ Copy authentication components to `src/components/auth/`
+- ✅ Copy authentication views to `src/views/auth/`
+- ✅ Copy authentication store module to `src/store/modules/auth.js`
+- ✅ Copy authentication composables to `src/composables/`
+- ✅ Create authentication routes in `src/router/auth.js`
+- ✅ Update main router to include auth routes
+- ✅ Update main.js with auth initialization
+- ✅ Update main store to include auth module
+- ✅ Create authentication configuration in `src/config/auth.js`
 
-// Your existing routes and store modules
-import { routes } from './router/routes'
-import appModule from './store/modules/app'
+## Laravel Backend Setup
 
-const app = createApp(App)
+Make sure your Laravel backend has Sanctum configured:
 
-// Create router
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
-
-// Create store
-const store = createStore({
-  modules: {
-    app: appModule
-  }
-})
-
-// Initialize authentication feature
-const authFeature = createAuthenticationFeature({
-  apiBaseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
-  tokenKey: import.meta.env.VITE_TOKEN_KEY || 'auth_token',
-  userKey: import.meta.env.VITE_USER_KEY || 'auth_user',
-  afterLogin: '/dashboard',
-  afterLogout: '/',
-  afterRegister: '/dashboard'
-})
-
-// Register the feature using vue3plate's feature integration system
-const { registerFeature } = useFeatureIntegration()
-registerFeature(authFeature)
-
-app.use(router)
-app.use(store)
-app.mount('#app')
+```php
+// config/sanctum.php
+'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
+    '%s%s',
+    'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+    env('APP_URL') ? ','.parse_url(env('APP_URL'), PHP_URL_HOST) : ''
+))),
 ```
 
-## Environment Configuration
+## Environment Setup
 
-Update your `.env` file:
+Create a `.env` file in your Vue project root:
 
 ```env
-VITE_API_URL=http://localhost:8000/api
-VITE_TOKEN_KEY=auth_token
-VITE_USER_KEY=auth_user
+VITE_API_URL=http://localhost:8000
 ```
 
-## Components
+## Usage
 
-- `LoginForm` - Complete login form component
-- `RegisterForm` - Complete registration form component  
-- `AuthGuard` - Component for protecting authenticated content
-
-## Pages
-
-- `LoginPage` - Full login page with branding
-- `RegisterPage` - Full registration page with branding
-
-## Usage Examples
-
-### Dashboard Page Example
+### Authentication in Components
 
 ```vue
-<!-- views/private/DashboardPage.vue -->
 <template>
-  <div class="dashboard">
-    <h1>Welcome, {{ fullName }}!</h1>
-    <p>Role: {{ userRole }}</p>
-    <p>Status: {{ userStatus }}</p>
-    
-    <div class="dashboard-actions">
-      <button @click="handleLogout" class="btn btn-secondary">
-        Logout
-      </button>
+  <div>
+    <div v-if="isAuthenticated">
+      Welcome, {{ user.name }}!
+      <button @click="logout">Logout</button>
+    </div>
+    <div v-else>
+      <router-link to="/login">Login</router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useAuth } from 'vue3plate-auth-sanctum'
+import { useAuth } from '@/composables/useAuth'
 
-const config = {
-  apiBaseUrl: import.meta.env.VITE_API_URL,
-  tokenKey: import.meta.env.VITE_TOKEN_KEY,
-  userKey: import.meta.env.VITE_USER_KEY,
-  afterLogout: '/'
-}
-
-const { fullName, userRole, userStatus, logout } = useAuth(config)
-
-const handleLogout = async () => {
-  await logout()
-}
+const { isAuthenticated, user, logout } = useAuth()
 </script>
 ```
 
-### Protecting Routes with AuthGuard
-
-```vue
-<!-- Any component that needs authentication -->
-<template>
-  <AuthGuard :config="authConfig">
-    <div class="protected-content">
-      <h2>This content is only visible to authenticated users</h2>
-    </div>
-  </AuthGuard>
-</template>
-
-<script setup>
-import { AuthGuard } from 'vue3plate-auth-sanctum'
-
-const authConfig = {
-  apiBaseUrl: import.meta.env.VITE_API_URL,
-  tokenKey: import.meta.env.VITE_TOKEN_KEY,
-  userKey: import.meta.env.VITE_USER_KEY
-}
-</script>
-```
-
-### Route Configuration Example
+### Route Guards
 
 ```javascript
-// router/routes.js
-export const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: () => import('../views/public/HomePage.vue')
-  },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: () => import('../views/private/DashboardPage.vue'),
-    meta: {
-      requiresAuth: true
-    }
+// src/router/index.js
+router.beforeEach(async (to, from, next) => {
+  const { isAuthenticated } = useAuth()
+  
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
+    next('/login')
+  } else if (to.meta.requiresGuest && isAuthenticated.value) {
+    next('/dashboard')
+  } else {
+    next()
   }
-  // Authentication routes are automatically added by the package
-]
+})
 ```
 
-## Available Composables
+## File Structure After Installation
 
-- `useAuth(config)` - Main authentication composable with all auth methods
+```
+src/
+├── components/
+│   └── auth/           # Authentication components
+├── views/
+│   └── auth/           # Authentication views
+├── store/
+│   └── modules/
+│       └── auth.js     # Auth Vuex module
+├── composables/
+│   └── useAuth.js      # Authentication composable
+├── router/
+│   ├── index.js        # Main router (updated)
+│   └── auth.js         # Auth routes (new)
+└── config/
+    └── auth.js         # Auth configuration (new)
+```
 
-## Available API Methods
+## Uninstall
 
-- `authApi.login(credentials)`
-- `authApi.register(userData)`
-- `authApi.logout()`
-
-## Route Meta Properties
-
-- `requiresAuth: true` - Requires user to be authenticated
-- `requiresGuest: true` - Requires user to NOT be authenticated
-- `requiresRole: 'Admin'` - Requires specific role
-- `requiresAnyRole: ['Admin', 'Staff']` - Requires any of the specified roles
-
-## API Integration
-
-Automatically integrates with Laravel Sanctum endpoints:
-
-| Frontend Method | Laravel Endpoint | Status |
-|----------------|------------------|---------|
-| `authApi.register()` | `POST /register-account` | ✅ Supported |
-| `authApi.login()` | `POST /login` | ✅ Supported |
-| `authApi.logout()` | `POST /logout` | ✅ Supported |
-
-## Laravel Backend Setup
-
-Make sure your Laravel backend has the `sioph/laravelplate-authentication-sanctum` package installed:
+To remove the authentication package:
 
 ```bash
-composer require sioph/laravelplate-authentication-sanctum
+npm uninstall vue3plate-auth-sanctum
 ```
 
-## Laravel Backend Compatibility
+**Note:** This will only remove the package files, not the files that were copied to your project. You'll need to manually remove those if desired.
 
-This package is designed to work with:
-- [sioph/laravel10plate-authentication-sanctum](https://github.com/sioph/laravel10plate-authentication-sanctum)
+## Development
 
-## Package Architecture
+This package is designed to work like Laravel Composer packages - it automatically integrates into your project structure instead of just providing imports.
 
-The package follows a modular architecture that integrates seamlessly with vue3plate's feature system:
+## Support
 
-- **API Layer** (`src/utils/api.js`) - Handles all HTTP requests to Laravel backend
-- **Store Module** (`src/store/auth.js`) - Vuex store for authentication state management
-- **Composable** (`src/composables/useAuth.js`) - Vue 3 Composition API wrapper
-- **Components** (`src/components/`) - Reusable authentication components
-- **Views** (`src/views/`) - Complete page components
-- **Routes** (`src/utils/routes.js`) - Authentication route definitions
-
-## User Experience
-
-After login/register, users will see:
-- User dropdown menu with only **Logout** option
-- No profile management links or buttons
-- Clean, focused authentication experience
-
-## Development Notes
-
-This package was specifically designed to match the Laravel backend capabilities. Features like profile management, password changes, and user editing were intentionally excluded to maintain perfect compatibility with the `sioph/laravel10plate-authentication-sanctum` backend package.
-
-## License
-
-MIT 
+For issues and questions, please visit the [GitHub repository](https://github.com/sioph/vue3plate-authentication-sanctum). 

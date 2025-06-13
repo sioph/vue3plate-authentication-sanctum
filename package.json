@@ -5,6 +5,9 @@
   "description": "Vue 3 authentication package for vue3plate boilerplate that integrates with Laravel Sanctum",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
+  "bin": {
+    "vue3plate-auth-install": "./bin/install.js"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",
@@ -14,12 +17,15 @@
   "files": [
     "dist",
     "src",
+    "bin",
+    "stubs",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "vite build --mode lib",
     "dev": "vite build --mode lib --watch",
+    "postinstall": "node bin/install.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublishOnly": "npm run build"
   },
