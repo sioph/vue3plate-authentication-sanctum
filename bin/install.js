@@ -72,7 +72,21 @@ class Vue3PlateAuthInstaller {
         if (!fs.existsSync(packageJsonPath)) return false;
         
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-        return packageJson.name && packageJson.name.includes('vue3plate');
+        
+        // Check for Vue3Plate project indicators
+        const isVuePlateProject = packageJson.name && (
+            packageJson.name.includes('vue3plate') || 
+            packageJson.name.includes('vueplate') ||
+            packageJson.name === 'vueplate'
+        );
+        
+        // Also check for Vue 3 dependencies as additional confirmation
+        const hasVue3 = packageJson.dependencies && packageJson.dependencies.vue;
+        const hasVueRouter = packageJson.dependencies && packageJson.dependencies['vue-router'];
+        const hasVuex = packageJson.dependencies && packageJson.dependencies.vuex;
+        
+        return (isVuePlateProject || (hasVue3 && hasVueRouter && hasVuex)) && 
+               fs.existsSync(path.join(this.projectRoot, 'src'));
     }
 
     async copyAuthComponents() {
