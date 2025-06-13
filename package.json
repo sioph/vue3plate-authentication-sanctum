@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Vue 3 authentication package for vue3plate boilerplate that integrates with Laravel Sanctum",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs.js"
     }
   },
   "files": [
@@ -17,8 +17,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
+    "build": "vite build --mode lib",
+    "dev": "vite build --mode lib --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublishOnly": "npm run build"
   },
@@ -45,21 +45,18 @@
   },
   "homepage": "https://github.com/sioph/vue3plate-authentication-sanctum#readme",
   "peerDependencies": {
-    "vue": "^3.0.0",
-    "vue-router": "^4.0.0",
-    "vuex": "^4.0.0",
-    "axios": "^1.0.0",
     "@fortawesome/fontawesome-svg-core": "^6.0.0",
     "@fortawesome/free-solid-svg-icons": "^6.0.0",
-    "@fortawesome/vue-fontawesome": "^3.0.0"
+    "@fortawesome/vue-fontawesome": "^3.0.0",
+    "axios": "^1.0.0",
+    "vue": "^3.0.0",
+    "vue-router": "^4.0.0",
+    "vuex": "^4.0.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.0",
-    "rollup-plugin-vue": "^6.0.0",
+    "@vitejs/plugin-vue": "^4.0.0",
     "@vue/compiler-sfc": "^3.3.0",
-    "rollup": "^3.0.0",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "vite": "^4.0.0",
     "vue": "^3.3.0"
   },
   "engines": {
